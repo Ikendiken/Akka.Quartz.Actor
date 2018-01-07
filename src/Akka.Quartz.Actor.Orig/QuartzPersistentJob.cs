@@ -2,7 +2,6 @@ using Akka.Actor;
 using Akka.Util.Internal;
 using Quartz;
 using Akka.Serialization;
-using System.Threading.Tasks;
 
 namespace Akka.Quartz.Actor
 {
@@ -15,14 +14,15 @@ namespace Akka.Quartz.Actor
         private const string ActorKey = "actor";
         public const string SysKey = "sys";
 
-        public Task Execute(IJobExecutionContext context)
+        public void Execute(IJobExecutionContext context)
         {
             var jdm = context.JobDetail.JobDataMap;
             if (jdm.ContainsKey(MessageKey) && jdm.ContainsKey(ActorKey))
             {
+                var actorPath = jdm[ActorKey] as string;
                 var sys = context.Scheduler.Context[SysKey] as ActorSystem;
 
-                if (jdm[ActorKey] is string actorPath && sys != null)
+                if (actorPath != null && sys != null)
                 {
                     ActorSelection selection = sys.ActorSelection(actorPath);
                     byte[] messageBytes = jdm[MessageKey] as byte[];
@@ -30,8 +30,6 @@ namespace Akka.Quartz.Actor
                     selection.Tell(message);
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         public static JobBuilder CreateBuilderWithData(ActorPath actorPath, object message, ActorSystem system)

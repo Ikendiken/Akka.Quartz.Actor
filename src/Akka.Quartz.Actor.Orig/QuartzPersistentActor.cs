@@ -13,9 +13,11 @@ namespace Akka.Quartz.Actor
     /// </summary>
     public class QuartzPersistentActor : QuartzActor
     {
-        public QuartzPersistentActor() 
-            : base(new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult())
+        private readonly IScheduler _scheduler;
+
+        public QuartzPersistentActor()
         {
+            _scheduler = new StdSchedulerFactory().GetScheduler();
             this.AddSystemToScheduler();
         }
 

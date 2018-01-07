@@ -5,9 +5,7 @@ using Akka.Quartz.Actor.Commands;
 using Akka.Quartz.Actor.Events;
 using Akka.Quartz.Actor.Exceptions;
 using Quartz;
-using Quartz.Impl;
 using Xunit;
-using IScheduler = Quartz.IScheduler;
 
 namespace Akka.Quartz.Actor.Tests
 {
@@ -18,12 +16,12 @@ namespace Akka.Quartz.Actor.Tests
         {
             var probe = CreateTestProbe(Sys);
             var quartzActor = Sys.ActorOf(Props.Create(() => new QuartzPersistentActor()), "QuartzActor");
-            quartzActor.Tell(new CreatePersistentJob(probe.Ref.Path, "Hello", TriggerBuilder.Create().WithCronSchedule("0/10 * * * * ?").Build()));
+            quartzActor.Tell(new CreatePersistentJob(probe.Ref.Path, "Hello", TriggerBuilder.Create().WithCronSchedule("*0/10 * * * * ?").Build()));
             ExpectMsg<JobCreated>();
             probe.ExpectMsg("Hello", TimeSpan.FromSeconds(11));
             Thread.Sleep(TimeSpan.FromSeconds(10));
             probe.ExpectMsg("Hello");
-            Sys.Stop(quartzActor);
+            Sys.Stop(quartzActor);            
         }
 
         [Fact]
@@ -38,21 +36,6 @@ namespace Akka.Quartz.Actor.Tests
             ExpectMsg<JobRemoved>();
             Thread.Sleep(TimeSpan.FromSeconds(10));
             probe.ExpectNoMsg(TimeSpan.FromSeconds(10));
-            Sys.Stop(quartzActor);
-        }
-
-        [Fact]
-        public void QuartzPersistantActor_Should_Create_Job_With_Schedule()
-        {
-            var probe = CreateTestProbe(Sys);
-            var trigger = TriggerBuilder.Create().WithCronSchedule("0/10 * * * * ?").Build();
-            var scheduler = new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult();
-            var quartzActor = Sys.ActorOf(Props.Create(() => new QuartzPersistentActor(scheduler)), "QuartzActor");
-            quartzActor.Tell(new CreatePersistentJob(probe.Ref.Path, "Hello", trigger));
-            ExpectMsg<JobCreated>();
-            probe.ExpectMsg("Hello", TimeSpan.FromSeconds(11));
-            Thread.Sleep(TimeSpan.FromSeconds(10));
-            probe.ExpectMsg("Hello");
             Sys.Stop(quartzActor);
         }
 
@@ -83,7 +66,7 @@ namespace Akka.Quartz.Actor.Tests
             var probe = CreateTestProbe(Sys);
             var quartzActor = Sys.ActorOf(Props.Create(() => new QuartzPersistentActor()), "QuartzActor");
             quartzActor.Tell(new RemoveJob(new JobKey("key"), new TriggerKey("key")));
-            var failure = ExpectMsg<RemoveJobFail>();
+            var failure=ExpectMsg<RemoveJobFail>();
             Assert.IsType<JobNotFoundException>(failure.Reason);
             Sys.Stop(quartzActor);
         }

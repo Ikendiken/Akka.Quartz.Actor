@@ -4,7 +4,6 @@ using Akka.Actor;
 using Akka.Quartz.Actor.Commands;
 using Akka.Quartz.Actor.Events;
 using Akka.Quartz.Actor.Exceptions;
-using Quartz;
 using Quartz.Impl;
 using IScheduler = Quartz.IScheduler;
 
@@ -16,18 +15,18 @@ namespace Akka.Quartz.Actor
     /// </summary>
     public class QuartzActor : ActorBase
     {
-        private readonly IScheduler _scheduler;
+        protected readonly IScheduler _scheduler;
 
         private readonly bool _externallySupplied;
 
         public QuartzActor()
         {
-            _scheduler = new StdSchedulerFactory().GetScheduler();
+            _scheduler = new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult();
         }
 
         public QuartzActor(NameValueCollection props)
         {
-            _scheduler = new StdSchedulerFactory(props).GetScheduler();
+            _scheduler = new StdSchedulerFactory(props).GetScheduler().GetAwaiter().GetResult();
         }
 
         public QuartzActor(IScheduler scheduler)
@@ -93,7 +92,7 @@ namespace Akka.Quartz.Actor
         {
             try
             {
-                var deleted = _scheduler.DeleteJob(removeJob.JobKey);
+                var deleted = _scheduler.DeleteJob(removeJob.JobKey).GetAwaiter().GetResult();
                 if (deleted)
                 {
                     Context.Sender.Tell(new JobRemoved(removeJob.JobKey, removeJob.TriggerKey));

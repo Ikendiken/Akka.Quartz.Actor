@@ -14,7 +14,7 @@ namespace Akka.Quartz.Actor.Events
 
         public override string ToString()
         {
-            return string.Format("{0} with trigger {1} has been created.", JobKey, TriggerKey);
+            return $"{JobKey} with trigger {TriggerKey} has been created.";
         }
     }
 
@@ -30,7 +30,7 @@ namespace Akka.Quartz.Actor.Events
 
         public override string ToString()
         {
-            return string.Format("{0} with trigger {1} has been removed.", JobKey, TriggerKey);
+            return $"{JobKey} with trigger {TriggerKey} has been removed.";
         }
     }
 }

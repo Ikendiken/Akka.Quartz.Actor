@@ -17,7 +17,7 @@ namespace Akka.Quartz.Actor.Events
 
         public override string ToString()
         {
-            return string.Format("Remove job {0} with trigger {1} fail. With reason {2}", JobKey, TriggerKey, Reason);
+            return $"Remove job {JobKey} with trigger {TriggerKey} fail. With reason {Reason}";
         }
     }
 }
